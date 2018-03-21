@@ -62,7 +62,6 @@ def RequestInsert(request):
         Image = request.POST.get('Image') or ''
         LatLonTuple = request.POST.get('LatLonTuple')
         DeviceID = request.POST.get('DeviceID')
-        print(request.POST)
         try:
             if not LatLonValidator(LatLonTuple):
                 response['code'] = 'LATLON-DECODE-ERROR'
@@ -98,6 +97,7 @@ def RequestInsert(request):
         response['code'] = '500-METHOD-NOT-ALLOWED'
         return HttpResponse(dumps(response))
 
+@csrf_exempt
 def GetRequests(request):
     response = {'code':'SOE-404','data':[]}
     if request.method == "GET":
@@ -114,6 +114,19 @@ def GetRequests(request):
             return HttpResponse(dumps(response))
         except:
             return HttpResponse(dumps(response))
+    elif request.method == "POST":
+        tok = request.POST.get('tok')
+        if tok is not None:
+            StationID = cache.get(tok)
+            # Get the Station object
+            StationObj = Station.objects.get(StationID__exact=StationID)
+            # Filter out the requests that have been previously accepted by that station
+
+            rList = Request.objects.filter(AcceptedFrom__exact=StationObj)
+            data = [i.__json__() for i in rList]
+            response['code'] = 'OK-200'
+            response['data'] = data
+            return HttpResponse(dumps(response))
     else:
         response['code'] = '500-METHOD-NOT-ALLOWED'
         return HttpResponse(dumps(response))
@@ -122,7 +135,6 @@ def GetStations(request):
     response = {'code':'SOE-404','data':[]}
     if request.method == "GET":
         LatLonTuple = request.GET.get('Position')
-        print(LatLonTuple)
         try:
             if not LatLonValidator(LatLonTuple):
                 response['code'] = 'LATLON-DECODE-ERROR'
@@ -134,7 +146,6 @@ def GetStations(request):
         ll = LatLonTuple.split(',')
         llt = (float(ll[0]),float(ll[1]))
         try:
-            print(llt)
             Stations = get_all_nearest(llt)
             response['code'] = 'OK-200'
             response['data'] = Stations
@@ -153,7 +164,6 @@ def Login(request):
         SPOCPassword = request.POST.get('SPOCPassword')
         if all([i!=None for i in [SPOCUsername, SPOCPassword]]):
             SPOCPassword = sha256(SPOCPassword.encode()).hexdigest()
-            print(SPOCPassword)
             try:
                 StationObject = Station.objects.get(SPOCUsername__exact=SPOCUsername,SPOCPassword__exact=SPOCPassword)
                 if StationObject:
@@ -162,8 +172,6 @@ def Login(request):
                 # Currently we are using a pickled Dictionary
                     tok = sha256(str(random()).encode()).hexdigest()
                     cache.set(tok,StationObject.StationID)
-                    cache.persist(tok)
-                    print(cache.get(tok))
                     return HttpResponse(tok)
             except Station.DoesNotExist:
                 return HttpResponse()
@@ -175,8 +183,9 @@ def Logout(request):
     if request.method == "POST":
         token = request.POST.get('tok')
         if token is not None:
-            if cache.get(tok) is not None:
-                cache.delete(tok)
+            stnID = cache.get(token)
+            if  stnID is not None:
+                cache.delete(token)
             else:
                 response['code'] = '404-NOT-LOGGED-IN'
                 return HttpResponse(response)
@@ -188,6 +197,24 @@ def Logout(request):
 # The Token will fetch the StationID from Redis Cache and return appropriate response.
 # If User logs out then Token will be deleted from Redis Cache and No Mapping will be available
 # Thus a user that is not logged in can not access any of the APIs
+@csrf_exempt
 def AcceptRequest(request):
     if request.method == "POST":
-        pass
+        token = request.POST.get('tok')
+        RequestID = request.POST.get('rid')
+        try:
+            # Get the RequestID and Accept Request
+            RequestObj = Request.objects.get(RequestID__exact=RequestID)
+            RequestObj.isAccepted = True
+
+            StationID = cache.get(token)
+
+            StationObj = Station.objects.get(StationID__exact=StationID)
+            RequestObj.AcceptedFrom = StationObj
+
+            RequestObj.save()
+            return HttpResponse(dumps({'code':'OK-200','data':{}}))
+        except Exception as e:
+            print(e)
+            return HttpResponse(dumps({'code':'SOE-404','data':{}}))
+

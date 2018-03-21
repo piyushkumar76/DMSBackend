@@ -24,5 +24,6 @@ urlpatterns = [
     path('GetStations/',Sviews.GetStations),
     path('Login/',Sviews.Login),
     path('Logout/',Sviews.Logout),
+    path('AcceptRequest/',Sviews.AcceptRequest),
     path('admin/', admin.site.urls),
 ]

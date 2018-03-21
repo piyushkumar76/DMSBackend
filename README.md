@@ -47,3 +47,17 @@ OK-200 = All Clear Success
   METHOD = GET
   Data Parameters =
     (I) DeviceID ( Pass Android or iOS Device ID )
+
+5. Login -
+URL = localhost:8000/Login
+METHOD = POST
+Data Parameters = 
+(I) SPOCUsername
+(II) SPOCPassword
+Return Value will be a token.
+
+6. Logout - 
+URL=  "localhost:8000/Logout"
+METHOD = POST
+Data Parameters =
+(I) tok

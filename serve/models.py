@@ -1,7 +1,10 @@
 from django.db import models
 from geopy.distance import distance
+from django.core.cache import cache
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 class Station(models.Model):
     StationID = models.CharField(max_length=100,primary_key=True)
@@ -70,7 +73,17 @@ def send_to_nearest(sender, instance, created, **kwargs):
         StationList = []
         allStations = Station.objects.all()
         for i in allStations:
-            StationList.append({"stnObject":i.__json__(),"distance":i._get_distance(latLonReq)})
+            StationList.append({"stnObject":i.__json__(),"distance":i._get_distance(latLonReq),"StationID":i.StationID})
         StationList.sort(key=lambda i:i["distance"])
-        print(StationList)
+        for i in StationList:
+            stnID = i['StationID']
+            socketID = cache.get(stnID)
+            print(socketID)
+            # send the request to SocketID
+            if socketID is not None:
+                # Socket of this Station is connected Send it the request and loop out
+                channel_layer = get_channel_layer()
+                data =  instance.__json__()
+                data['event'] = 'new_request'
+                async_to_sync(channel_layer.send)(socketID,{"type": "chat.message","text":data})
     post_save.disconnect(send_to_nearest, sender=Request)
