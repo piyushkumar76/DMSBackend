@@ -1,0 +1,75 @@
+ <head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head> 
+<form method="POST" onsubmit='return login(this)'>
+	<input type="text" id="SPOCUsername" name="SPOCUsername"/>
+	<input type="password" id="SPOCPassword"  name="SPOCPassword"/>
+	<button type='submit' id="submit" name="submit">Login</button>
+</form>"
+<button id="requests">Get Requests</button>
+<button id="socket">Establish Socket Connection</button>
+<button id="logout">Logout</button>
+<div id="latestReq">
+</div>
+<script>
+	var ws = new WebSocket("ws://localhost:8000/connectToServer");
+	ws.onopen = function(msg) {
+						console.log('opened');
+	};
+	ws.onmessage = function(msg){
+			//location.href = "http://www.google.com";
+			console.log('SOCKET MESSAGE:',msg.data);
+			var lel = JSON.parse(msg.data);
+			if (lel['RequestID'] !=undefined){
+				$('#latestReq').append('<button onclick="accept(this)" rid='+lel['RequestID']+'>'+lel['RequestID']+'</button>');	
+		}
+	}
+
+	function login( form ){
+  		var data = $(form).serializeArray();            //login vala
+  		var cred_json = {};
+
+    	$.map(data, function(n, i){
+        	cred_json[n['name']] = n['value'];
+    	});
+  		$.post("http://localhost:8000/Login/", cred_json, 
+  			function(data, status) {
+  				if (data == '') {
+  					console.log('Login Failed');
+  				} else {
+					localStorage.setItem("tok",data);
+					ws.send(JSON.stringify({tok:data}));
+					}
+  				}
+  		);
+  		return false;
+	}
+
+
+	function accept(request){                                 //respond se data backend se aaega
+		$.post("http://localhost:8000/AcceptRequest/", {tok: localStorage.getItem('tok'), rid: request.getAttribute('rid')},
+			function(data){
+				console.log(data);
+		});
+	}
+
+	$(document).ready(function() {                                   //socket
+
+		$('#requests').click(function() {
+					$.post("http://localhost:8000/GetRequests/", {tok: localStorage.getItem('tok')},
+					function(data) {
+						console.log(data);
+			});
+		});
+
+		$('#logout').click(function() {                    //logout
+					$.post("http://localhost:8000/Logout/", {tok: localStorage.getItem('tok')},
+					function(data) {
+						console.log(data);
+			});
+		});
+		$('#socket').click(function() {
+			//ws.send(JSON.stringify({tok:localStorage.getItem('tok')}));			
+		});
+	});
+</script>

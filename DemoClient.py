@@ -26,9 +26,9 @@ def TESTSocketandRequest(token):
 def TESTRequest():
     request_url = "http://localhost:8000/RequestInsert/"
     data = {
-    'IncidentType': 'Fire',
-    'LatLonTuple': '28.123123,10.12313',
-    'DeviceID': 'lala'
+    'IncidentType': 'Earthquake',
+    'LatLonTuple': '48.123123,10.12313',
+    'DeviceID': '13434'
     }
     return post(request_url, data=data)
 
@@ -55,16 +55,17 @@ def TESTAccept(tok, rid):
     print(post(url, data=data).text)
 
 if __name__ == "__main__":
-    print('*Attempting Login*')
-    tok = Login().text
-    print('*Login Success*')
-    print('*Received Token as', tok)
-    data = TESTSocketandRequest(tok)
-    print('*Got A Notification FOr Request ', data)
-    RequestID = data['RequestID']
-    print('*Extracting The Request ID and Submit it to acceptance*')
-    TESTAccept(tok,RequestID)
-    TESTAcceptedRequests(tok)
-    print('*Logging Out*')
-    Logout(tok)
-    print('*Logout Success*')
+    TESTRequest()
+    # print('*Attempting Login*')
+    # tok = Login().text
+    # print('*Login Success*')
+    # print('*Received Token as', tok)
+    # data = TESTSocketandRequest(tok)
+    # print('*Got A Notification FOr Request ', data)
+    # RequestID = data['RequestID']
+    # print('*Extracting The Request ID and Submit it to acceptance*')
+    # TESTAccept(tok,RequestID)
+    # TESTAcceptedRequests(tok)
+    # print('*Logging Out*')
+    # Logout(tok)
+    # print('*Logout Success*')
