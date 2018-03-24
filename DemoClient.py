@@ -1,17 +1,18 @@
 from requests import get, post
 from websocket import WebSocket
 from json import loads,dumps
-
+base_url = "localhost"
+port = "7890"
 def Login():
     data={
     'SPOCUsername':'TEST_USER',
     'SPOCPassword':'TEST_PASS'
     }
-    login_url = "http://localhost:8000/Login/"
+    login_url = "http://{}:{}/Login/".format(base_url,port)
     return post(login_url, data=data)
 
 def TESTSocketandRequest(token):
-    ws_url = "ws://localhost:8000/connectToServer"
+    ws_url = "ws://{}:{}/connectToServer".format(base_url,port)
     ws = WebSocket()
     print('*Connecting Socket*')
     ws.connect(ws_url)
@@ -24,7 +25,7 @@ def TESTSocketandRequest(token):
     return loads(ws.recv())
 
 def TESTRequest():
-    request_url = "http://localhost:8000/RequestInsert/"
+    request_url = "http://{}:{}/RequestInsert/".format(base_url, port)
     data = {
     'IncidentType': 'Fire',
     'LatLonTuple': '28.123123,10.12313',
@@ -36,14 +37,14 @@ def Logout(token):
     data ={
         'tok':token
     }
-    logout_url = "http://localhost:8000/Logout/"
+    logout_url = "http://{}:{}/Logout/".format(base_url, port)
     return post(logout_url, data=data)
 
 def TESTAcceptedRequests(tok):
     data = {
     'tok':tok
     }
-    url = "http://localhost:8000/GetRequests/"
+    url = "http://{}:{}/GetRequests/".format(base_url, port)
     print(post(url, data=data).text)
 
 def TESTAccept(tok, rid):
@@ -51,7 +52,7 @@ def TESTAccept(tok, rid):
     'tok':tok,
     'rid':rid
     }
-    url = "http://localhost:8000/AcceptRequest/"
+    url = "http://{}:{}/AcceptRequest/".format(base_url, port)
     print(post(url, data=data).text)
 
 if __name__ == "__main__":

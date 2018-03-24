@@ -218,3 +218,18 @@ def AcceptRequest(request):
             print(e)
             return HttpResponse(dumps({'code':'SOE-404','data':{}}))
 
+def GetSingleRequest(request):
+    response = {'code': 'SOE-404', 'data':[]}
+    if request.method == "GET":
+        RequestID = request.GET.get('RequestID')
+        if RequestID is None:
+            response['code'] ='NO_RequestID'
+            return HttpResponse(dumps(response))
+        try:
+            response['data'] = Request.objects.get(RequestID__exact=RequestID).__json__()
+            response['code'] = 'OK-200'
+            return HttpResponse(dumps(response))
+        except Request.DoesNotExist:
+            return HttpResponse(dumps(response))
+    else:
+        return HttpResponse(dumps(response))

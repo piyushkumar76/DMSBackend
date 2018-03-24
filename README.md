@@ -42,12 +42,16 @@ OK-200 = All Clear Success
   Data Parameters =
     (I) Position ( LatLonTuple )
 
-4. Get Requests -
+4.a Get Requests -
   URL = localhost:8000/GetRequests
   METHOD = GET
   Data Parameters =
     (I) DeviceID ( Pass Android or iOS Device ID )
-
+4.b Get Single Request - 
+  URL = localhost:8000/GetSingleRequest
+  METHOD = GET
+  Data Parameters = 
+    (I) RequestID ( Pass the RequestID for which data is required)
 5. Login -
 URL = localhost:8000/Login
 METHOD = POST
@@ -61,3 +65,5 @@ URL=  "localhost:8000/Logout"
 METHOD = POST
 Data Parameters =
 (I) tok
+
+

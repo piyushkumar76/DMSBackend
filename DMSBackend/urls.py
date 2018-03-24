@@ -22,6 +22,7 @@ urlpatterns = [
     path('RequestInsert/',Sviews.RequestInsert),
     path('GetRequests/',Sviews.GetRequests),
     path('GetStations/',Sviews.GetStations),
+    path('GetSingleRequest/', Sviews.GetSingleRequest),
     path('Login/',Sviews.Login),
     path('Logout/',Sviews.Logout),
     path('AcceptRequest/',Sviews.AcceptRequest),

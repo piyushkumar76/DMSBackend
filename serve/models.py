@@ -45,7 +45,7 @@ class Request(models.Model):
 
     def __json__(self):
         res= {"RequestID":self.RequestID,"IncidentType":self.IncidentType,
-                "Details":self.Details, "Image":self.Image, "LatLonTuple":self.LatLonTuple}
+                "Details":self.Details, "Image":self.Image, "LatLonTuple":self.LatLonTuple,"isAccepted":self.isAccepted}
         if self.isAccepted:
             res["AcceptedFrom"] = self.AcceptedFrom.StationName
             res['LatLonStation'] = self.AcceptedFrom.LatLonTuple
