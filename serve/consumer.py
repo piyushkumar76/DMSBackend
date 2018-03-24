@@ -6,6 +6,7 @@ from asgiref.sync import async_to_sync
 class ServeConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
+        self.stnID = ''
         await self.accept()
 
     async def receive_json(self, content):
@@ -26,4 +27,5 @@ class ServeConsumer(AsyncJsonWebsocketConsumer):
     async def disconnect(self, close_code):
         # Called when the socket
         cache.delete(self.stnID)
+        await self.send_json({'code':'OUT-200'})
         print(close_code)

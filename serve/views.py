@@ -102,6 +102,7 @@ def GetRequests(request):
     response = {'code':'SOE-404','data':[]}
     if request.method == "GET":
         DeviceID = request.GET.get('DeviceID')
+        isAccepted = request.GET.get('isAccepted')
         if DeviceID is None:
             response['code'] = 'NO_DeviceID'
             return HttpResponse(dumps(response))
@@ -119,6 +120,9 @@ def GetRequests(request):
         if tok is not None:
             StationID = cache.get(tok)
             # Get the Station object
+            if StationID is None:
+                response['code'] = '404-NOT-LOGGED-IN'
+                return HttpResponse(dumps(response))
             StationObj = Station.objects.get(StationID__exact=StationID)
             # Filter out the requests that have been previously accepted by that station
 
@@ -172,6 +176,7 @@ def Login(request):
                 # Currently we are using a pickled Dictionary
                     tok = sha256(str(random()).encode()).hexdigest()
                     cache.set(tok,StationObject.StationID)
+                    cache.persist(tok)
                     return HttpResponse(tok)
             except Station.DoesNotExist:
                 return HttpResponse()
@@ -186,11 +191,12 @@ def Logout(request):
             stnID = cache.get(token)
             if  stnID is not None:
                 cache.delete(token)
+                cache.delete(stnID)
             else:
                 response['code'] = '404-NOT-LOGGED-IN'
-                return HttpResponse(response)
-        return HttpResponse(response)
-    return HttpResponse(response)
+                return HttpResponse(dumps(response))
+        return HttpResponse(dumps(response))
+    return HttpResponse(dumps(response))
 
 
 # From this point on after logging in every request will contain this returned Token
@@ -213,8 +219,51 @@ def AcceptRequest(request):
             RequestObj.AcceptedFrom = StationObj
 
             RequestObj.save()
+            cache.delete(StationID+RequestID)
             return HttpResponse(dumps({'code':'OK-200','data':{}}))
         except Exception as e:
             print(e)
             return HttpResponse(dumps({'code':'SOE-404','data':{}}))
 
+@csrf_exempt
+def GetPastRequests(request):
+    response = {'code':'SOE-404', 'data':[]}
+    if request.method == "POST":
+        token = request.POST.get('tok')
+        if token is not None:
+            try:  
+                StationID = cache.get(token)
+                if StationID is None:
+                    response['code'] = '404-NOT-LOGGED-IN'
+                    return HttpResponse(dumps(response))
+                # get all keys matching this station
+                PastRequests = [i.replace(StationID,'') for i in cache.keys(StationID+'*')]
+                if "" in PastRequests:
+                    PastRequests.remove("")
+                response['data'] = PastRequests
+                response['code'] = 'OK-200'
+                return HttpResponse(dumps(response))
+            except Exception as e:
+                print(e)
+                return HttpResponse(dumps(response))
+        else:
+            response['code'] = '404-NOT-LOGGED-IN'
+            return HttpResponse(dumps(response))
+    return HttpResponse() 
+
+def GetSingleRequest(request):
+    response = {'code': 'SOE-404', 'data':[]}
+    if request.method == "GET":
+        RequestID = request.GET.get('RequestID')
+        if RequestID is None:
+            response['code'] ='NO_RequestID'
+            return HttpResponse(dumps(response))
+        try:
+            response['data'] = Request.objects.get(RequestID__exact=RequestID).__json__()
+            response['code'] = 'OK-200'
+            return HttpResponse(dumps(response))
+        except Request.DoesNotExist:
+            response['code'] = 'INVALID-REQUEST-ID'
+            return HttpResponse(dumps(response))
+    else:
+        return HttpResponse(dumps(response))

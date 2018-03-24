@@ -16,8 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from serve import views as Sviews
+from django.core.cache import cache
 
 urlpatterns = [
+    #path('', lambda x: cache.clear()),
     path('StationInsert/',Sviews.StationInsert),
     path('RequestInsert/',Sviews.RequestInsert),
     path('GetRequests/',Sviews.GetRequests),
@@ -25,5 +27,7 @@ urlpatterns = [
     path('Login/',Sviews.Login),
     path('Logout/',Sviews.Logout),
     path('AcceptRequest/',Sviews.AcceptRequest),
+    path('GetPastRequests/',Sviews.GetPastRequests),
+    path('GetSingleRequest/', Sviews.GetSingleRequest),
     path('admin/', admin.site.urls),
 ]

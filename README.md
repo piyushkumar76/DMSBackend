@@ -10,7 +10,7 @@ OK-200 = All Clear Success
 
 1. Insert A Station -
   METHOD = POST
-  URL = localhost:8000/StationInsert
+  URL = 18.188.41.89:7890/StationInsert
   Data Parameters =
     (I) StationID
     (I) StationName
@@ -43,7 +43,7 @@ OK-200 = All Clear Success
     (I) Position ( LatLonTuple )
 
 4. Get Requests -
-  URL = localhost:8000/GetRequests
+  URL = 18.188.41.89:7890/GetRequests
   METHOD = GET
   Data Parameters =
     (I) DeviceID ( Pass Android or iOS Device ID )

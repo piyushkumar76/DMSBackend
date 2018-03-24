@@ -6,6 +6,31 @@ from django.dispatch import receiver
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
+"""
+User is not an entity
+User kaise save karaenge ? Disaster me login thode na karega sir.
+
+Request has a foreignkey field to the StationID
+Server has them stored with isAccepted = False
+
+This is a transitive data.
+You can not do CURD for it.
+Redis API for what ?
+
+Cache Exp?osing is a very bad practice.
+
+Till a station has not accepted the request you can not say to which station a reqest has been assigned.
+
+Its asburd that a Station will DENY the request.
+Matlab BC disaster center wale request nahi accept karenge?
+paisa gaand marane ka paate hai kya disaster center wale.
+
+He wants an API for pending requests ?
+
+On Request Insert there goes  a post_save signal as a DB trigger to find the nearest staion based on the 
+Request LatLon.
+"""
+
 class Station(models.Model):
     StationID = models.CharField(max_length=100,primary_key=True)
     StationName = models.CharField(max_length=200)
@@ -78,7 +103,6 @@ def send_to_nearest(sender, instance, created, **kwargs):
         for i in StationList:
             stnID = i['StationID']
             socketID = cache.get(stnID)
-            print(socketID)
             # send the request to SocketID
             if socketID is not None:
                 # Socket of this Station is connected Send it the request and loop out
@@ -86,4 +110,7 @@ def send_to_nearest(sender, instance, created, **kwargs):
                 data =  instance.__json__()
                 data['event'] = 'new_request'
                 async_to_sync(channel_layer.send)(socketID,{"type": "chat.message","text":data})
+                cache.set(stnID+instance.RequestID, '')
+                cache.persist(stnID+instance.RequestID)
+                break
     post_save.disconnect(send_to_nearest, sender=Request)
