@@ -7,11 +7,11 @@ def Login():
     'SPOCUsername':'TEST_USER',
     'SPOCPassword':'TEST_PASS'
     }
-    login_url = "http://18.188.41.89:8000/Login/"
+    login_url = "http://localhost:8000/Login/"
     return post(login_url, data=data)
 
 def TESTSocketandRequest(token):
-    ws_url = "ws://18.188.41.89:8000/connectToServer"
+    ws_url = "ws://localhost:8000/connectToServer"
     ws = WebSocket()
     print('*Connecting Socket*')
     ws.connect(ws_url)
@@ -36,14 +36,14 @@ def Logout(token):
     data ={
         'tok':token
     }
-    logout_url = "http://18.188.41.89:8000/Logout/"
+    logout_url = "http://localhost:8000/Logout/"
     return post(logout_url, data=data)
 
 def TESTAcceptedRequests(tok):
     data = {
     'tok':tok
     }
-    url = "http://18.188.41.89:8000/GetRequests/"
+    url = "http://localhost:8000/GetRequests/"
     print(post(url, data=data).text)
 
 def TESTAccept(tok, rid):
@@ -51,7 +51,7 @@ def TESTAccept(tok, rid):
     'tok':tok,
     'rid':rid
     }
-    url = "http://18.188.41.89:8000/AcceptRequest/"
+    url = "http://localhost:8000/AcceptRequest/"
     print(post(url, data=data).text)
 
 if __name__ == "__main__":

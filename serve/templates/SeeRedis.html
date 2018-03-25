@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#redis {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#redis td, #redis th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#redis tr:nth-child(even){background-color: #e1a19e;}
+
+#redis tr:hover {background-color: #ddd;}
+
+#redis th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #d82f27;
+    color: white;
+}
+button {
+    background-color: Transparent;
+    background-repeat:no-repeat;
+    border: none;
+    cursor:pointer;
+    overflow: hidden;
+    outline:none;
+}
+</style>
+<script type="text/javascript">
+  function remove(key)
+  {
+    document.getElementById(key).outerHTML=''; 
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", "http://localhost:8000/RemoveFromRedis/"+key, false ); // false for synchronous request
+    xmlHttp.send( null );
+    window.location.reload(false); 
+    return xmlHttp.responseText;
+  }
+  function dumpall(){
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", "http://localhost:8000/EmptyRedis/", false ); // false for synchronous request
+    xmlHttp.send( null );
+    window.location.reload(false); 
+    return xmlHttp.responseText;
+  }
+</script>
+</head>
+<body>
+
+<table id="redis">
+  <tr>
+  <th>Click on A key to delete it from Redis</th> <th colspan=2><button style="color:white" onclick="dumpall()">Click Me to Empty It at once.</th>
+  </tr>
+  <tr>
+    <th>Keys</th>
+    <th>Values</th>
+    <th>TTL</th>
+  </tr>
+  {% for i in table %}
+    <tr id={{i.key}}><td ><button onclick="remove('{{i.key}}')">{{i.key}}</button></td><td>{{i.value}}</td><td>{{i.ttl}}</td></tr>
+  {% endfor %}
+</table>
+
+</body>
+</html>

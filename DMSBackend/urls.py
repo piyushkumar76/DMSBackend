@@ -1,25 +1,13 @@
-"""DMSBackend URL Configuration
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/2.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 from serve import views as Sviews
 from django.core.cache import cache
+from django.shortcuts import render
+from django.http import HttpResponse
+
 
 urlpatterns = [
-    #path('', lambda x: cache.clear()),
     path('StationInsert/',Sviews.StationInsert),
     path('RequestInsert/',Sviews.RequestInsert),
     path('GetRequests/',Sviews.GetRequests),
@@ -30,4 +18,11 @@ urlpatterns = [
     path('GetPastRequests/',Sviews.GetPastRequests),
     path('GetSingleRequest/', Sviews.GetSingleRequest),
     path('admin/', admin.site.urls),
+
+
+#### URLs To handle Redis ####
+    path('SeeRedis/',lambda request : render(request, 'SeeRedis.html', {'table':[{'key':i,'value':cache.get(i),'ttl':str(cache.ttl(i))} for i in cache.keys('*')]})),
+    path('EmptyRedis/', lambda request: render(request,'SeeRedis.html',{'eval':cache.clear()})),
+    path('RemoveFromRedis/<key>', lambda request,key: render(request,'SeeRedis.html',{'eval':cache.delete(key)})),
+    path('SetInRedis/<key>/<value>', lambda request, key,value: render(request, 'SeeRedis.html', {'eval':cache.set(key,value)}))
 ]

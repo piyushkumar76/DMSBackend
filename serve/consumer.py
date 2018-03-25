@@ -16,6 +16,7 @@ class ServeConsumer(AsyncJsonWebsocketConsumer):
             self.stnID = StationID
             if StationID is not None:
                 cache.set(StationID, self.channel_name)
+                cache.persist(StationID)
                 await self.send_json({'code': 'OK-200'})
             else:
                 await self.send_json({'code': 'UNAUTHED-400'})

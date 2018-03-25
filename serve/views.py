@@ -74,6 +74,10 @@ def RequestInsert(request):
         ll = LatLonTuple.split(',')
         llt = (float(ll[0]),float(ll[1]))
         #print(get_nearest(llt))
+        print(rid)
+        print(IncidentType)
+        print(LatLonTuple)
+        print(DeviceID)
 
         if all([i!=None for i in [rid, IncidentType, LatLonTuple, DeviceID]]):
             try:
@@ -267,3 +271,5 @@ def GetSingleRequest(request):
             return HttpResponse(dumps(response))
     else:
         return HttpResponse(dumps(response))
+
+
